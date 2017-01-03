@@ -1,5 +1,6 @@
 #include <boost/optional.hpp>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 namespace game_2048 {
@@ -64,8 +65,17 @@ class Board {
 
 class Game {
    public:
-    void initialize(const Matrix& data) {
+    unique_ptr<Matrix> initialize(int n_rows, int n_cols) {
+        // clang-format off
+        auto data = make_unique<Matrix>(Matrix({
+            {0, 0, 0, 0},
+		    {0, 2, 2, 0},
+		    {4, 0, 0, 0},
+		    {0, 0, 0, 0}
+	    }));
+        // clang-format on
         // TODO: 2 2s appear randomly in the matrix
+        return data;
     }
     void play(const Matrix& data) {
         human_play(data);
@@ -84,15 +94,9 @@ class Game {
 }  // namespace game_on
 
 int main() {
-    // clang-format off
-    game_2048::Matrix data{
-        {0, 0, 0, 0},
-		{0, 2, 2, 0},
-		{4, 0, 0, 0},
-		{0, 0, 0, 0}
-	};
-    // clang-format on
-    game_2048::Board b;
-    b.print(data);
+    game_2048::Game game;
+    game_2048::Board board;
+    auto data = game.initialize(4, 4);
+    board.print(*data);
     return 0;
 }
