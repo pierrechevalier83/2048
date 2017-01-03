@@ -2,11 +2,15 @@
 #include <iostream>
 #include <vector>
 
+namespace game_2048 {
 using namespace std;
+
+using Row = vector<int>;
+using Matrix = vector<Row>;
 
 class Board {
    public:
-    void print(const vector<vector<int>>& data) {
+    void print(const Matrix& data) {
         size_t n_rows = 0;
         for (const auto& row : data) {
             n_rows = row.size();
@@ -34,7 +38,7 @@ class Board {
         }
         new_line();
     }
-    void value_row(const vector<int>& row) {
+    void value_row(const Row& row) {
         print_sep();
         for (const auto& value : row) {
             print_value(value);
@@ -47,7 +51,7 @@ class Board {
             if (*value == 0) {
                 cout << "   .   ";
             } else {
-			    // TODO: format centered (7 spaces) instead!
+                // TODO: format centered (7 spaces) instead!
                 cout << "   " << *value << "   ";
             }
         } else {
@@ -58,15 +62,37 @@ class Board {
     void new_line() { cout << '\n'; }
 };
 
+class Game {
+   public:
+    void initialize(const Matrix& data) {
+        // TODO: 2 2s appear randomly in the matrix
+    }
+    void play(const Matrix& data) {
+        human_play(data);
+        computer_play(data);
+    }
+
+   private:
+    void human_play(const Matrix& data) {
+        // TODO: take input from cin and update data appropriately
+    }
+    void computer_play(const Matrix& data) {
+        // TODO: generate 2 random numbers that can be 2 (proba: .9) or 4
+        // (proba: .1) in two random empty cases of the matrix.
+    }
+};
+}  // namespace game_on
+
 int main() {
     // clang-format off
-    vector<vector<int>> data{
+    game_2048::Matrix data{
         {0, 0, 0, 0},
 		{0, 2, 2, 0},
 		{4, 0, 0, 0},
 		{0, 0, 0, 0}
 	};
-	// clang-format on
-    Board b;
+    // clang-format on
+    game_2048::Board b;
     b.print(data);
+    return 0;
 }
