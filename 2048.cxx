@@ -1,4 +1,5 @@
 #include <boost/optional.hpp>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -52,11 +53,21 @@ class Board {
             if (*value == 0) {
                 cout << "   .   ";
             } else {
-                // TODO: format centered (7 spaces) instead!
-                cout << "   " << *value << "   ";
+                print_centered(to_string(*value), 7);
             }
         } else {
             cout << "       ";
+        }
+    }
+    void print_centered(string content, size_t width) {
+        if (content.length() >= width) {
+            cout << content;
+        } else {
+            auto padding = (width - content.length()) / 2;
+            for (size_t i = 0; i < padding; ++i) {
+                cout << ' ';
+            }
+            cout << setw(width - padding) << left << content;
         }
     }
     void print_sep() { cout << '|'; }
@@ -66,15 +77,9 @@ class Board {
 class Game {
    public:
     unique_ptr<Matrix> initialize(int n_rows, int n_cols) {
-        // clang-format off
-        auto data = make_unique<Matrix>(Matrix({
-            {0, 0, 0, 0},
-		    {0, 2, 2, 0},
-		    {4, 0, 0, 0},
-		    {0, 0, 0, 0}
-	    }));
-        // clang-format on
-        // TODO: 2 2s appear randomly in the matrix
+        auto data = make_unique<Matrix>(Matrix(n_rows, Row(n_cols, 0)));
+        randomly_insert(2, *data);
+        randomly_insert(2, *data);
         return data;
     }
     void play(const Matrix& data) {
@@ -83,6 +88,10 @@ class Game {
     }
 
    private:
+    void randomly_insert(int value, Matrix& data) {
+        // TODO: random and empty cell
+        data[0][2] = value;
+    }
     void human_play(const Matrix& data) {
         // TODO: take input from cin and update data appropriately
     }
