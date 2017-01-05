@@ -49,14 +49,15 @@ class Board {
         new_line();
     }
     void print_value(boost::optional<int> value) {
-        if (value) {
+        const auto cell_width = 7;
+		if (value) {
             if (*value == 0) {
-                cout << "   .   ";
+                print_centered(".", cell_width);
             } else {
-                print_centered(to_string(*value), 7);
+                print_centered(to_string(*value), cell_width);
             }
         } else {
-            cout << "       ";
+            print_centered("", cell_width);
         }
     }
     void print_centered(string content, size_t width) {
