@@ -76,7 +76,7 @@ class Board {
 	}
     void print_sep() { cout << '|'; }
     void new_line() { cout << '\n'; }
-    int cell_width = 7;
+    const int cell_width = 7;
 };
 
 class Game {
