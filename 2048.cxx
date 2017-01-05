@@ -1,4 +1,5 @@
 #include <boost/optional.hpp>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -81,6 +82,9 @@ class Board {
 
 class Game {
    public:
+    Game() {
+        srand(time(0));
+	}
     unique_ptr<Matrix> initialize(int n_rows, int n_cols) {
         auto data = make_unique<Matrix>(Matrix(n_rows, Row(n_cols, 0)));
         randomly_insert(2, *data);
@@ -94,14 +98,22 @@ class Game {
 
    private:
     void randomly_insert(int value, Matrix& data) {
-        // TODO: random and empty cell
-        data[0][2] = value;
+		vector<pair<size_t, size_t>> zeroes;
+		for (size_t ii = 0; ii < data.size(); ++ii) {
+		    for (size_t jj = 0; jj < data[ii].size(); ++ jj) {
+			    if (data[ii][jj] == 0) {
+				    zeroes.push_back(make_pair(ii, jj));
+				}
+			}
+		}
+        auto& pos = zeroes[rand() % zeroes.size()];
+        data[pos.first][pos.second] = value;
     }
     void human_play(const Matrix&) {
         // TODO: take input from cin and update data appropriately
     }
     void computer_play(const Matrix&) {
-        // TODO: generate 2 random numbers that can be 2 (proba: .9) or 4
+        // TODO: generate 1 random number that can be 2 (proba: .9) or 4
         // (proba: .1) in two random empty cases of the matrix.
     }
 };
