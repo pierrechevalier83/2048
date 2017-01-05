@@ -80,6 +80,8 @@ class Board {
     const int cell_width = 7;
 };
 
+enum class Status { ongoing, interrupted, lost, won };
+
 class Game {
    public:
     Game() {
@@ -91,13 +93,16 @@ class Game {
         randomly_insert(2, *data);
         return data;
     }
-    void play(const Matrix& data) {
-        human_play(data);
-        computer_play(data);
+    Status play(Matrix& data) {
+        auto status = human_play(data);
+		if (status == Status::ongoing) { 
+            status = computer_play(data);
+		}
+		return status;
     }
 
    private:
-    void randomly_insert(int value, Matrix& data) {
+    bool randomly_insert(int value, Matrix& data) {
 		vector<pair<size_t, size_t>> zeroes;
 		for (size_t ii = 0; ii < data.size(); ++ii) {
 		    for (size_t jj = 0; jj < data[ii].size(); ++ jj) {
@@ -106,23 +111,49 @@ class Game {
 				}
 			}
 		}
+		if (zeroes.empty()) {
+		    return false;
+		}
         auto& pos = zeroes[rand() % zeroes.size()];
         data[pos.first][pos.second] = value;
+		return true;
     }
-    void human_play(const Matrix&) {
+    Status human_play(const Matrix&) {
+	    cout << flush;
+		char input;
+		cin >> input;
+		if (input == 'q') {
+		    cout << "See you later!\n";
+			return Status::interrupted;
+		}
+		cin.clear();
         // TODO: take input from cin and update data appropriately
+		return Status::ongoing;
     }
-    void computer_play(const Matrix&) {
-        // TODO: generate 1 random number that can be 2 (proba: .9) or 4
-        // (proba: .1) in two random empty cases of the matrix.
+    Status computer_play(Matrix& data) {
+	    int value = 2;
+		if (rand() % 10 == 1) {
+		    value = 4;
+		}
+		if (!randomly_insert(value, data)) {
+		    cout << "Game over!\n";
+			return Status::interrupted;
+		}
+		return Status::ongoing;
     }
 };
+
+
 }  // namespace game_on
 
 int main() {
     game_2048::Game game;
     game_2048::Board board;
-    auto data = game.initialize(4, 4);
-    board.print(*data);
+    auto data = *game.initialize(4, 4);
+    auto status = game_2048::Status::ongoing;
+	while (status == game_2048::Status::ongoing) {
+	    board.print(data);
+		status = game.play(data);
+    }
     return 0;
 }
