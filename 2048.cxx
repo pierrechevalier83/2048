@@ -1,3 +1,4 @@
+#include <curses.h>
 #include <boost/optional.hpp>
 #include <cstdlib>
 #include <iomanip>
@@ -13,7 +14,19 @@ using Matrix = vector<Row>;
 
 class Board {
    public:
+    Board() {
+	    // initialize ncurses
+	    initscr();
+		// don't buffer characters
+		cbreak();
+		// don't print input
+        noecho();
+		// capture arrow keys
+		keypad(stdscr, true);
+	}
     void print(const Matrix& data) {
+	    refresh();
+		move(0,0);
         size_t n_rows = 0;
         for (const auto& row : data) {
             n_rows = row.size();
@@ -27,12 +40,12 @@ class Board {
 
    private:
     void sep_row(size_t n) {
-        cout << '+';
+        addch('+');
         for (size_t i = 0; i < n; ++i) {
             print_n_chars(cell_width, '-');
-			cout << '+';
+			addch('+');
         }
-        cout << '\n';
+        addch('\n');
     }
     void padding_row(size_t n) {
         print_sep();
@@ -63,20 +76,21 @@ class Board {
     }
     void print_centered(string content, size_t width) {
         if (content.length() >= width) {
-            cout << content;
+            printw(content.c_str());
         } else {
             auto padding = (width - content.length()) / 2;
             print_n_chars(padding, ' ');
-            cout << setw(width - padding) << left << content;
+            //cout << setw(width - padding) << left <<
+			printw("%-*s", width - padding, content.c_str()); // TODO: format
         }
     }
 	void print_n_chars(size_t n, char c) {
 	    for (size_t i = 0; i < n; ++i) {
-		    cout << c;
+		    addch(c);
 		}
 	}
-    void print_sep() { cout << '|'; }
-    void new_line() { cout << '\n'; }
+    void print_sep() { addch('|'); }
+    void new_line() { addch('\n'); }
     const int cell_width = 7;
 };
 
@@ -119,11 +133,12 @@ class Game {
 		return true;
     }
     Status human_play(const Matrix&) {
-	    cout << flush;
-		char input;
-		cin >> input;
+	    //cout << flush;
+		//char input;
+		int input = getch();
+		//cin >> input;
 		if (input == 'q') {
-		    cout << "See you later!\n";
+		    printw("See you later!\n");
 			return Status::interrupted;
 		}
 		cin.clear();
@@ -136,7 +151,7 @@ class Game {
 		    value = 4;
 		}
 		if (!randomly_insert(value, data)) {
-		    cout << "Game over!\n";
+		    printw("Game over!\n");
 			return Status::interrupted;
 		}
 		return Status::ongoing;
