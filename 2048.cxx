@@ -27,14 +27,15 @@ class Board {
    private:
     void sep_row(size_t n) {
         cout << '+';
-        for (int i = 0; i < n; ++i) {
-            cout << "-------+";
+        for (size_t i = 0; i < n; ++i) {
+            print_n_chars(cell_width, '-');
+			cout << '+';
         }
         cout << '\n';
     }
     void padding_row(size_t n) {
         print_sep();
-        for (int i = 0; i < n; ++i) {
+        for (size_t i = 0; i < n; ++i) {
             print_value(boost::none);
             print_sep();
         }
@@ -49,7 +50,6 @@ class Board {
         new_line();
     }
     void print_value(boost::optional<int> value) {
-        const auto cell_width = 7;
 		if (value) {
             if (*value == 0) {
                 print_centered(".", cell_width);
@@ -65,14 +65,18 @@ class Board {
             cout << content;
         } else {
             auto padding = (width - content.length()) / 2;
-            for (size_t i = 0; i < padding; ++i) {
-                cout << ' ';
-            }
+            print_n_chars(padding, ' ');
             cout << setw(width - padding) << left << content;
         }
     }
+	void print_n_chars(size_t n, char c) {
+	    for (size_t i = 0; i < n; ++i) {
+		    cout << c;
+		}
+	}
     void print_sep() { cout << '|'; }
     void new_line() { cout << '\n'; }
+    int cell_width = 7;
 };
 
 class Game {
@@ -93,10 +97,10 @@ class Game {
         // TODO: random and empty cell
         data[0][2] = value;
     }
-    void human_play(const Matrix& data) {
+    void human_play(const Matrix&) {
         // TODO: take input from cin and update data appropriately
     }
-    void computer_play(const Matrix& data) {
+    void computer_play(const Matrix&) {
         // TODO: generate 2 random numbers that can be 2 (proba: .9) or 4
         // (proba: .1) in two random empty cases of the matrix.
     }
