@@ -80,8 +80,7 @@ class Board {
         } else {
             auto padding = (width - content.length()) / 2;
             print_n_chars(padding, ' ');
-            // cout << setw(width - padding) << left <<
-            printw("%-*s", width - padding, content.c_str());  // TODO: format
+            printw("%-*s", width - padding, content.c_str());
         }
     }
     void print_n_chars(size_t n, char c) {
