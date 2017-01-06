@@ -1,5 +1,7 @@
 #include <curses.h>
 #include <boost/optional.hpp>
+
+#include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -12,16 +14,39 @@ using namespace std;
 using Row = vector<int>;
 using Matrix = vector<Row>;
 
+class ColorScheme {
+   public:
+    ColorScheme() {
+        start_color();
+        for (int i = 0; i < 256; ++i) {
+            init_pair(i, i, COLOR_BLACK);
+        }
+    }
+};
+
+class Color {
+   public:
+    Color(int n) {
+        attron(COLOR_PAIR(n));
+        attron(A_BOLD);
+    }
+    ~Color() {
+        attroff(COLOR_PAIR(n));
+        attroff(A_BOLD);
+    }
+
+   private:
+    int n;
+};
+
 class Board {
    public:
     Board() {
         // initialize ncurses
         initscr();
-        // don't buffer characters
+        ColorScheme scheme;
         cbreak();
-        // don't print input
         noecho();
-        // capture arrow keys
         keypad(stdscr, true);
     }
     void print(const Matrix& data) {
@@ -68,6 +93,7 @@ class Board {
             if (*value == 0) {
                 print_centered(".", cell_width);
             } else {
+                Color scoped_color(static_cast<int>(log2(*value)));
                 print_centered(to_string(*value), cell_width);
             }
         } else {
