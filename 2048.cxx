@@ -49,9 +49,12 @@ class Board {
         noecho();
         keypad(stdscr, true);
     }
-    void print(const Matrix& data) {
+    void print(const Matrix& data, int score) {
         refresh();
         move(0, 0);
+        clear();
+        print_aligned_right(to_string(score), (cell_width + 1) * n_cols(data));
+        addch('\n');
         size_t n_rows = 0;
         for (const auto& row : data) {
             n_rows = row.size();
@@ -64,6 +67,10 @@ class Board {
     }
 
    private:
+    int n_cols(const Matrix& data) {
+        assert(!data.empty());
+        return data[0].size();
+    }
     void sep_row(size_t n) {
         addch('+');
         for (size_t i = 0; i < n; ++i) {
@@ -100,17 +107,24 @@ class Board {
             print_centered("", cell_width);
         }
     }
-    void print_centered(string content, size_t width) {
+    void print_centered(const string& content, size_t width) {
+        auto offset = (width - content.length()) / 2;
+        print_positioned(content, width, offset);
+    }
+    void print_aligned_right(const string& content, size_t width) {
+        auto offset = width - content.length();
+        print_positioned(content, width, offset);
+    }
+    void print_positioned(const string& content, size_t width, int offset) {
         if (content.length() >= width) {
             printw(content.c_str());
         } else {
-            auto padding = (width - content.length()) / 2;
-            print_n_chars(padding, ' ');
-            printw("%-*s", width - padding, content.c_str());
+            print_n_chars(offset, ' ');
+            printw("%-*s", width - offset, content.c_str());
         }
     }
-    void print_n_chars(size_t n, char c) {
-        for (size_t i = 0; i < n; ++i) {
+    void print_n_chars(int n, char c) {
+        for (int i = 0; i < n; ++i) {
             addch(c);
         }
     }
@@ -138,7 +152,7 @@ class Game {
             flash();
             status = Status::ongoing;
         } else if (status == Status::interrupted) {
-            printw("Do you really want to quit? (y/n)");
+            printw("Do you really want to quit? (y/n)\n");
             auto input = getch();
             if (input == 'n' || input == 'N') {
                 clear();
@@ -150,6 +164,7 @@ class Game {
 
         return status;
     }
+    int score = 0;
 
    private:
     bool randomly_insert(int value, Matrix& data) {
@@ -234,6 +249,7 @@ class Game {
             previous_value = *it;
             if (*(it - 1) == previous_value) {
                 *it *= 2;
+                score += *it;
                 *(it - 1) = 0;
                 rotate(row.begin(), it - 1, it);
             }
@@ -261,7 +277,7 @@ int main() {
     auto data = *game.initialize(4, 4);
     auto status = game_2048::Status::ongoing;
     while (status == game_2048::Status::ongoing) {
-        board.print(data);
+        board.print(data, game.score);
         status = game.play(data);
     }
     return 0;
