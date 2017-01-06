@@ -119,7 +119,7 @@ class Board {
     const int cell_width = 7;
 };
 
-enum class Status { ongoing, interrupted, lost, won };
+enum class Status { ongoing, invalid_move, interrupted, lost, won };
 
 class Game {
    public:
@@ -134,7 +134,20 @@ class Game {
         auto status = human_play(data);
         if (status == Status::ongoing) {
             status = computer_play(data);
+        } else if (status == Status::invalid_move) {
+            flash();
+            status = Status::ongoing;
+        } else if (status == Status::interrupted) {
+            printw("Do you really want to quit? (y/n)");
+            auto input = getch();
+            if (input == 'n' || input == 'N') {
+                clear();
+                return Status::ongoing;
+            } else {
+                return Status::interrupted;
+            }
         }
+
         return status;
     }
 
@@ -156,18 +169,23 @@ class Game {
         return true;
     }
     Status human_play(Matrix& data) {
+        auto new_data = data;
         int input = getch();
         if (input == 'q') {
-            printw("See you later!\n");
             return Status::interrupted;
         } else if (input == KEY_UP) {
-            data = up(data);
+            new_data = up(data);
         } else if (input == KEY_DOWN) {
-            data = down(data);
+            new_data = down(data);
         } else if (input == KEY_RIGHT) {
-            data = right(data);
+            new_data = right(data);
         } else if (input == KEY_LEFT) {
-            data = left(data);
+            new_data = left(data);
+        }
+        if (new_data == data) {
+            return Status::invalid_move;
+        } else {
+            data = new_data;
         }
         return Status::ongoing;
     }
