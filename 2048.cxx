@@ -212,7 +212,7 @@ class Game {
         stable_partition(row.begin(), row.end(),
                          [](auto val) { return val == 0; });
         int previous_value = 0;
-        for (auto it = row.end(); it != row.begin(); --it) {
+        for (auto it = row.end() - 1; it != row.begin(); --it) {
             previous_value = *it;
             if (*(it - 1) == previous_value) {
                 *it *= 2;
