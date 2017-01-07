@@ -72,10 +72,10 @@ class Board {
         return data[0].size();
     }
     void sep_row(size_t n) {
-        addch('+');
+        addch(' ');
         for (size_t i = 0; i < n; ++i) {
-            print_n_chars(cell_width, '-');
-            addch('+');
+            print_n_chars(cell_width, ' ');
+            addch(' ');
         }
         addch('\n');
     }
@@ -133,7 +133,7 @@ class Board {
             addch(c);
         }
     }
-    void print_sep() { addch('|'); }
+    void print_sep() { addch(' '); }
     void new_line() { addch('\n'); }
     const int cell_width = 7;
 };
