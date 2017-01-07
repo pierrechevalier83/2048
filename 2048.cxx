@@ -53,7 +53,10 @@ class Board {
         refresh();
         move(0, 0);
         clear();
-        print_aligned_right(to_string(score), (cell_width + 1) * n_cols(data));
+        auto title = "2048 [pierre.tech]"s;
+        printw(title.c_str());
+        auto remaining_space = (cell_width + 1) * n_cols(data) - title.length();
+        print_aligned_right(to_string(score), remaining_space);
         addch('\n');
         size_t n_rows = 0;
         for (const auto& row : data) {
