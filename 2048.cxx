@@ -146,13 +146,28 @@ class Game {
     }
     Status play(Matrix& data) {
         auto status = human_play(data);
-        if (status == Status::ongoing) {
-            status = computer_play(data);
+		if (status == Status::won) {
+            printw("Congratulations! You won! Do you want to stop playing now? (y/n)\n");
+	        status = prompt_for_exit();
+		} else if (status == Status::ongoing) {
+            computer_play(data);
         } else if (status == Status::invalid_move) {
             flash();
             status = Status::ongoing;
         } else if (status == Status::interrupted) {
             printw("Do you really want to quit? (y/n)\n");
+            status = prompt_for_exit();
+        } else if (status == Status::lost) {
+		    printw("Game over!\n(q for quit)\n");
+            int input = 0;
+			while (input !='q') {
+			    input = getch();
+			}
+		}
+
+        return status;
+    }
+	Status prompt_for_exit() {
             auto input = getch();
             if (input == 'n' || input == 'N') {
                 clear();
@@ -160,14 +175,11 @@ class Game {
             } else {
                 return Status::interrupted;
             }
-        }
-
-        return status;
-    }
+	}
     int score = 0;
 
    private:
-    bool randomly_insert(int value, Matrix& data) {
+    void randomly_insert(int value, Matrix& data) {
         vector<pair<size_t, size_t>> zeroes;
         for (size_t ii = 0; ii < data.size(); ++ii) {
             for (size_t jj = 0; jj < data[ii].size(); ++jj) {
@@ -176,16 +188,14 @@ class Game {
                 }
             }
         }
-        if (zeroes.empty()) {
-            return false;
+        if (!zeroes.empty()) {
+            auto& pos = zeroes[rand() % zeroes.size()];
+            data[pos.first][pos.second] = value;
         }
-        auto& pos = zeroes[rand() % zeroes.size()];
-        data[pos.first][pos.second] = value;
-        return true;
     }
     Status human_play(Matrix& data) {
         auto new_data = data;
-        int input = getch();
+        auto input = getch();
         if (input == 'q') {
             return Status::interrupted;
         } else if (input == KEY_UP) {
@@ -198,12 +208,19 @@ class Game {
             new_data = left(data);
         }
         if (new_data == data) {
-            return Status::invalid_move;
+            return lost(data) ? Status::lost : Status::invalid_move;
         } else {
             data = new_data;
         }
         return Status::ongoing;
     }
+	bool lost(const Matrix& data) {
+	    auto d_up = up(data);
+	    auto d_down = down(data);
+	    auto d_right = right(data);
+	    auto d_left = left(data);
+        return (d_up == data) && (d_down == data) && (d_right == data) && (d_left == data);
+	}
     Matrix up(const Matrix& data) {
         return rotate_left(left(rotate_right(data)));
     }
@@ -256,16 +273,12 @@ class Game {
         }
         return row;
     }
-    Status computer_play(Matrix& data) {
+    void computer_play(Matrix& data) {
         int value = 2;
         if (rand() % 10 == 1) {
             value = 4;
         }
-        if (!randomly_insert(value, data)) {
-            printw("Game over!\n");
-            return Status::interrupted;
-        }
-        return Status::ongoing;
+        randomly_insert(value, data);
     }
 };
 
