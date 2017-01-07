@@ -146,10 +146,8 @@ class Game {
     }
     Status play(Matrix& data) {
         auto status = human_play(data);
-		if (status == Status::won) {
-            printw("Congratulations! You won! Do you want to stop playing now? (y/n)\n");
-	        status = prompt_for_exit();
-		} else if (status == Status::ongoing) {
+        if (status == Status::won) {
+        } else if (status == Status::ongoing) {
             computer_play(data);
         } else if (status == Status::invalid_move) {
             flash();
@@ -158,24 +156,24 @@ class Game {
             printw("Do you really want to quit? (y/n)\n");
             status = prompt_for_exit();
         } else if (status == Status::lost) {
-		    printw("Game over!\n(q for quit)\n");
+            printw("Game over!\n(q for quit)\n");
             int input = 0;
-			while (input !='q') {
-			    input = getch();
-			}
-		}
+            while (input != 'q') {
+                input = getch();
+            }
+        }
 
         return status;
     }
-	Status prompt_for_exit() {
-            auto input = getch();
-            if (input == 'n' || input == 'N') {
-                clear();
-                return Status::ongoing;
-            } else {
-                return Status::interrupted;
-            }
-	}
+    Status prompt_for_exit() {
+        auto input = getch();
+        if (input == 'q' || input == 'n' || input == 'N') {
+            clear();
+            return Status::ongoing;
+        } else {
+            return Status::interrupted;
+        }
+    }
     int score = 0;
 
    private:
@@ -212,15 +210,33 @@ class Game {
         } else {
             data = new_data;
         }
-        return Status::ongoing;
+        return won(data) ? Status::won : Status::ongoing;
     }
-	bool lost(const Matrix& data) {
-	    auto d_up = up(data);
-	    auto d_down = down(data);
-	    auto d_right = right(data);
-	    auto d_left = left(data);
-        return (d_up == data) && (d_down == data) && (d_right == data) && (d_left == data);
-	}
+    bool lost(const Matrix& data) {
+        auto d_up = up(data);
+        auto d_down = down(data);
+        auto d_right = right(data);
+        auto d_left = left(data);
+        return (d_up == data) && (d_down == data) && (d_right == data) &&
+               (d_left == data);
+    }
+    bool won(const Matrix& data) {
+        static bool already_won = false;
+        if (already_won) {
+            // Only congratulate player once. If they want to keep playing, they
+            // don't want to be interrupted by us.
+            return false;
+        }
+        for (const auto& row : data) {
+            for (const auto& value : row) {
+                if (value >= 2048) {
+                    already_won = true;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     Matrix up(const Matrix& data) {
         return rotate_left(left(rotate_right(data)));
     }
@@ -292,6 +308,14 @@ int main() {
     while (status == game_2048::Status::ongoing) {
         board.print(data, game.score);
         status = game.play(data);
+
+        if (status == game_2048::Status::won) {
+            board.print(data, game.score);
+            printw(
+                "Congratulations! You won!\nDo you want to stop playing now? "
+                "(y/n)\n");
+            status = game.prompt_for_exit();
+        }
     }
     return 0;
 }
