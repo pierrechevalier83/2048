@@ -19,7 +19,7 @@ class ColorScheme {
     ColorScheme() {
         start_color();
         for (int i = 0; i < 256; ++i) {
-            init_pair(i, i, COLOR_BLACK);
+            init_pair(i, COLOR_BLACK, i);
         }
     }
 };
@@ -59,9 +59,9 @@ class Board {
         for (const auto& row : data) {
             n_rows = row.size();
             sep_row(n_rows);
-            padding_row(n_rows);
+            padding_row(row);
             value_row(row);
-            padding_row(n_rows);
+            padding_row(row);
         }
         sep_row(n_rows);
     }
@@ -79,10 +79,15 @@ class Board {
         }
         addch('\n');
     }
-    void padding_row(size_t n) {
+    void padding_row(const Row& row) {
         print_sep();
-        for (size_t i = 0; i < n; ++i) {
-            print_value(boost::none);
+        for (const auto& value : row) {
+            if (value != 0) {
+                Color scoped_color(static_cast<int>(log2(value)));
+                print_value(boost::none);
+            } else {
+                print_value(boost::none);
+            }
             print_sep();
         }
         new_line();
