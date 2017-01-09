@@ -12,8 +12,6 @@ Run
 
 TODO
 ----
-- Implement Game over when no more move is available
-- Implement optional game over when 2048 tile is generated
 - CMake
 - Use int consistently
 - Remove raw for loops
