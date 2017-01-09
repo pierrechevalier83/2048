@@ -18,10 +18,13 @@ class ColorScheme {
    public:
     ColorScheme() {
         start_color();
-        for (int i = 0; i < 256; ++i) {
-            init_pair(i, COLOR_BLACK, i);
+        int index = 0;
+        for (const auto& color : scheme) {
+            init_pair(index++, COLOR_BLACK, color);
         }
     }
+     vector<int> scheme = { 0, 247, 78, 222, 220, 214, 208,
+                            202, 196, 162, 160, 126, 124, 90, 88, 54, 52 };
 };
 
 class Color {
@@ -49,6 +52,7 @@ class Board {
         noecho();
         keypad(stdscr, true);
     }
+    ~Board() { endwin(); }
     void print(const Matrix& data, int score) {
         refresh();
         move(0, 0);
