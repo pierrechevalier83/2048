@@ -204,7 +204,6 @@ class Game {
         } else if (status == Status::ongoing) {
             computer_play(data);
         } else if (status == Status::invalid_move) {
-            flash();
             status = Status::ongoing;
         } else if (status == Status::interrupted) {
             printw("Do you really want to quit? (y/n)\n");
