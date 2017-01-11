@@ -9,11 +9,11 @@
 #include <memory>
 #include <vector>
 
-namespace game_2048 {
 using namespace std;
-
 using Row = vector<int>;
 using Matrix = vector<Row>;
+
+namespace ncurses {
 
 class ColorScheme {
    public:
@@ -49,7 +49,6 @@ struct Cell {
     int color_code;
 };
 
-namespace print {
 void n_chars(int n, char c) {
     for (int i = 0; i < n; ++i) {
         addch(c);
@@ -72,7 +71,17 @@ void aligned_right(const string& content, size_t width) {
     auto offset = width - content.length();
     positioned(content, width, offset);
 }
-}
+
+struct Environment {
+    Environment() {
+        initscr();
+        cbreak();
+        noecho();
+        keypad(stdscr, true);
+        ColorScheme scheme;
+    }
+    ~Environment() { endwin(); }
+};
 
 class MatrixDisplay {
    public:
@@ -96,10 +105,10 @@ class MatrixDisplay {
     void sep_row(int n) {
         corner();
         for (auto i = 0; i < n; ++i) {
-            print::n_chars(cell_width, row_sep);
+            ncurses::n_chars(cell_width, row_sep);
             corner();
         }
-        print::end_line();
+        ncurses::end_line();
     }
     void corner() { addch(corner_sep); }
     void values(const vector<Cell>& row) {
@@ -126,11 +135,11 @@ class MatrixDisplay {
         for (const auto& cell : row) {
             {
                 Color scoped(cell.color_code);
-                print::centered(cell.content, cell_width);
+                ncurses::centered(cell.content, cell_width);
             }
             sep_col();
         }
-        print::end_line();
+        ncurses::end_line();
     }
     void sep_col() { addch(col_sep); }
 
@@ -141,21 +150,15 @@ class MatrixDisplay {
     const char col_sep = '|';
     const char corner_sep = '+';
 };
+}  // namespace ncurses
+
+namespace game_2048 {
 
 class Board {
    public:
-    Board() {
-        // initialize ncurses
-        initscr();
-        ColorScheme scheme;
-        cbreak();
-        noecho();
-        keypad(stdscr, true);
-    }
-    ~Board() { endwin(); }
     void print(const Matrix& data, int score) {
         clear();
-        MatrixDisplay display;
+        ncurses::MatrixDisplay display;
         auto data_view = view(data);
         print_title_bar(score, display.width_in_chars(data_view));
         display.print(data_view);
@@ -170,16 +173,16 @@ class Board {
         const auto title = "2048 [pierre.tech]"s;
         printw(title.c_str());
         const auto remaining_space = width - title.length();
-        print::aligned_right(to_string(score), remaining_space);
+        ncurses::aligned_right(to_string(score), remaining_space);
         addch('\n');
     }
-    vector<vector<Cell>> view(const Matrix& data) {
-        vector<vector<Cell>> data_view;
+    vector<vector<ncurses::Cell>> view(const Matrix& data) {
+        vector<vector<ncurses::Cell>> data_view;
         boost::transform(data, back_inserter(data_view), [](const auto& row) {
-            vector<Cell> row_view;
+            vector<ncurses::Cell> row_view;
             boost::transform(row, back_inserter(row_view), [](const int value) {
-                return Cell(value == 0 ? "." : to_string(value),
-                            static_cast<int>(log2(value)));
+                return ncurses::Cell(value == 0 ? "." : to_string(value),
+                                     static_cast<int>(log2(value)));
             });
             return row_view;
         });
@@ -215,7 +218,6 @@ class Game {
                 input = getch();
             }
         }
-
         return status;
     }
     Status prompt_for_exit() {
@@ -354,6 +356,7 @@ class Game {
 }  // namespace game_on
 
 int main() {
+    ncurses::Environment env;
     game_2048::Game game;
     game_2048::Board board;
     auto data = *game.initialize(4, 4);
