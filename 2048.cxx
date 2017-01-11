@@ -154,8 +154,6 @@ class Board {
     }
     ~Board() { endwin(); }
     void print(const Matrix& data, int score) {
-        refresh();
-        move(0, 0);
         clear();
         MatrixDisplay display;
         auto data_view = view(data);
