@@ -202,6 +202,9 @@ class Game {
         return data;
     }
     Status play(Matrix& data) {
+	    if (lost(data)) {
+		    return Status::lost;
+		}
         auto status = human_play(data);
         if (status == Status::won) {
         } else if (status == Status::ongoing) {
@@ -211,12 +214,6 @@ class Game {
         } else if (status == Status::interrupted) {
             printw("Do you really want to quit? (y/n)\n");
             status = prompt_for_exit();
-        } else if (status == Status::lost) {
-            printw("Game over!\n(q for quit)\n");
-            int input = 0;
-            while (input != 'q') {
-                input = getch();
-            }
         }
         return status;
     }
@@ -371,7 +368,11 @@ int main() {
                 "Congratulations! You won!\nDo you want to stop playing now? "
                 "(y/n)\n");
             status = game.prompt_for_exit();
-        }
+        } else if (status == game_2048::Status::lost) {
+            board.print(data, game.score);
+            printw("Game over!\nDo you want to quit? (y/n)\n");
+            status = game.prompt_for_exit();
+		}
     }
     return 0;
 }
