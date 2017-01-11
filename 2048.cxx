@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <boost/optional.hpp>
+#include <boost/range/algorithm/transform.hpp>
 
 #include <cmath>
 #include <cstdlib>
@@ -23,8 +24,8 @@ class ColorScheme {
             init_pair(index++, COLOR_BLACK, color);
         }
     }
-     vector<int> scheme = { 0, 247, 78, 222, 220, 214, 208,
-                            202, 196, 162, 160, 126, 124, 90, 88, 54, 52 };
+    vector<int> scheme = {0,   247, 78,  222, 220, 214, 208, 202, 196,
+                          162, 160, 126, 124, 90,  88,  54,  52};
 };
 
 class Color {
@@ -42,6 +43,105 @@ class Color {
     int n;
 };
 
+struct Cell {
+    Cell(const string& s, int c) : content(s), color_code(c) {}
+    string content;
+    int color_code;
+};
+
+namespace print {
+void n_chars(int n, char c) {
+    for (int i = 0; i < n; ++i) {
+        addch(c);
+    }
+}
+void end_line() { addch('\n'); }
+void positioned(const string& content, size_t width, int offset) {
+    if (content.length() >= width) {
+        printw(content.c_str());
+    } else {
+        n_chars(offset, ' ');
+        printw("%-*s", width - offset, content.c_str());
+    }
+}
+void centered(const string& content, size_t width) {
+    auto offset = (width - content.length()) / 2;
+    positioned(content, width, offset);
+}
+void aligned_right(const string& content, size_t width) {
+    auto offset = width - content.length();
+    positioned(content, width, offset);
+}
+}
+
+class MatrixDisplay {
+   public:
+    int width_in_chars(const vector<vector<Cell>>& data) {
+        return (cell_width + 1) * n_rows(data);
+    }
+    void print(const vector<vector<Cell>>& data) {
+        int n = n_rows(data);
+        sep_row(n);
+        for (const auto& row : data) {
+            values(row);
+            sep_row(n);
+        }
+    }
+
+   private:
+    int n_rows(const vector<vector<Cell>>& data) {
+        assert(!data.empty());
+        return data[0].size();
+    }
+    void sep_row(int n) {
+        corner();
+        for (auto i = 0; i < n; ++i) {
+            print::n_chars(cell_width, row_sep);
+            corner();
+        }
+        print::end_line();
+    }
+    void corner() { addch(corner_sep); }
+    void values(const vector<Cell>& row) {
+        const auto line_height = 1;  // TODO: count \n characters
+        const auto previous_pad = (cell_height - line_height) / 2;
+        value_padding(previous_pad, row);
+        value(row);
+        const auto next_pad = cell_height - (previous_pad + line_height);
+        value_padding(next_pad, row);
+    }
+    void value_padding(int height, const vector<Cell>& row) {
+        vector<Cell> padding;
+        boost::transform(row, back_inserter(padding), [](const Cell& cell) {
+            auto padding_cell = cell;
+            padding_cell.content = "";
+            return padding_cell;
+        });
+        for (int i = 0; i < height; ++i) {
+            value(padding);
+        }
+    }
+    void value(const vector<Cell>& row) {
+        sep_col();
+        for (const auto& cell : row) {
+            {
+                Color scoped(cell.color_code);
+                print::centered(cell.content, cell_width);
+            }
+            sep_col();
+        }
+        print::end_line();
+    }
+    void sep_col() { addch(col_sep); }
+
+   private:
+    const int cell_width = 7;
+    const int cell_height = 3;
+    const char row_sep = '-';
+    const char col_sep = '|';
+    const char corner_sep = '+';
+};
+
 class Board {
    public:
     Board() {
@@ -57,20 +157,10 @@ class Board {
         refresh();
         move(0, 0);
         clear();
-        auto title = "2048 [pierre.tech]"s;
-        printw(title.c_str());
-        auto remaining_space = (cell_width + 1) * n_cols(data) - title.length();
-        print_aligned_right(to_string(score), remaining_space);
-        addch('\n');
-        size_t n_rows = 0;
-        for (const auto& row : data) {
-            n_rows = row.size();
-            sep_row(n_rows);
-            padding_row(row);
-            value_row(row);
-            padding_row(row);
-        }
-        sep_row(n_rows);
+        MatrixDisplay display;
+        auto data_view = view(data);
+        print_title_bar(score, display.width_in_chars(data_view));
+        display.print(data_view);
     }
 
    private:
@@ -78,71 +168,25 @@ class Board {
         assert(!data.empty());
         return data[0].size();
     }
-    void sep_row(size_t n) {
-        addch(' ');
-        for (size_t i = 0; i < n; ++i) {
-            print_n_chars(cell_width, ' ');
-            addch(' ');
-        }
+    void print_title_bar(int score, int width) {
+        const auto title = "2048 [pierre.tech]"s;
+        printw(title.c_str());
+        const auto remaining_space = width - title.length();
+        print::aligned_right(to_string(score), remaining_space);
         addch('\n');
     }
-    void padding_row(const Row& row) {
-        print_sep();
-        for (const auto& value : row) {
-            if (value != 0) {
-                Color scoped_color(static_cast<int>(log2(value)));
-                print_value(boost::none);
-            } else {
-                print_value(boost::none);
-            }
-            print_sep();
-        }
-        new_line();
+    vector<vector<Cell>> view(const Matrix& data) {
+        vector<vector<Cell>> data_view;
+        boost::transform(data, back_inserter(data_view), [](const auto& row) {
+            vector<Cell> row_view;
+            boost::transform(row, back_inserter(row_view), [](const int value) {
+                return Cell(value == 0 ? "." : to_string(value),
+                            static_cast<int>(log2(value)));
+            });
+            return row_view;
+        });
+        return data_view;
     }
-    void value_row(const Row& row) {
-        print_sep();
-        for (const auto& value : row) {
-            print_value(value);
-            print_sep();
-        }
-        new_line();
-    }
-    void print_value(boost::optional<int> value) {
-        if (value) {
-            if (*value == 0) {
-                print_centered(".", cell_width);
-            } else {
-                Color scoped_color(static_cast<int>(log2(*value)));
-                print_centered(to_string(*value), cell_width);
-            }
-        } else {
-            print_centered("", cell_width);
-        }
-    }
-    void print_centered(const string& content, size_t width) {
-        auto offset = (width - content.length()) / 2;
-        print_positioned(content, width, offset);
-    }
-    void print_aligned_right(const string& content, size_t width) {
-        auto offset = width - content.length();
-        print_positioned(content, width, offset);
-    }
-    void print_positioned(const string& content, size_t width, int offset) {
-        if (content.length() >= width) {
-            printw(content.c_str());
-        } else {
-            print_n_chars(offset, ' ');
-            printw("%-*s", width - offset, content.c_str());
-        }
-    }
-    void print_n_chars(int n, char c) {
-        for (int i = 0; i < n; ++i) {
-            addch(c);
-        }
-    }
-    void print_sep() { addch(' '); }
-    void new_line() { addch('\n'); }
-    const int cell_width = 7;
 };
 
 enum class Status { ongoing, invalid_move, interrupted, lost, won };
