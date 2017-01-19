@@ -84,12 +84,14 @@ class Game {
         return status;
     }
     Status prompt_for_exit() {
-        auto input = getch();
-        if (input == 'q' || input == 'n' || input == 'N') {
-            clear();
-            return Status::ongoing;
-        } else {
-            return Status::interrupted;
+        while (true) {
+            auto input = getch();
+            if (input == 'n' || input == 'N') {
+                clear();
+                return Status::ongoing;
+            } else if (input == 'y' || input == 'Y') {
+                return Status::interrupted;
+            }
         }
     }
     int score = 0;
