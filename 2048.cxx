@@ -17,15 +17,14 @@ namespace ncurses {
 
 class ColorScheme {
    public:
-    ColorScheme() {
+    ColorScheme(const vector<int>& scheme_) : scheme(scheme_) {
         start_color();
         int index = 0;
         for (const auto& color : scheme) {
             init_pair(index++, COLOR_BLACK, color);
         }
     }
-    vector<int> scheme = {0,   247, 78,  222, 220, 214, 208, 202, 196,
-                          162, 160, 126, 124, 90,  88,  54,  52};
+    vector<int> scheme;
 };
 
 class Color {
@@ -78,15 +77,30 @@ struct Environment {
         cbreak();
         noecho();
         keypad(stdscr, true);
-        ColorScheme scheme;
     }
     ~Environment() { endwin(); }
 };
 
+struct MatrixStyle {
+    MatrixStyle(int cell_width_, int cell_height_, char row_sep_, char col_sep_,
+                char corner_sep_)
+        : cell_width(cell_width_),
+          cell_height(cell_height_),
+          row_sep(row_sep_),
+          col_sep(col_sep_),
+          corner_sep(corner_sep_) {}
+    int cell_width;
+    int cell_height;
+    char row_sep;
+    char col_sep;
+    char corner_sep;
+};
+
 class MatrixDisplay {
    public:
+    MatrixDisplay(const MatrixStyle& style_) : style(style_) {}
     int width_in_chars(const vector<vector<Cell>>& data) {
-        return (cell_width + 1) * n_rows(data);
+        return (style.cell_width + 1) * n_rows(data);
     }
     void print(const vector<vector<Cell>>& data) {
         int n = n_rows(data);
@@ -105,18 +119,18 @@ class MatrixDisplay {
     void sep_row(int n) {
         corner();
         for (auto i = 0; i < n; ++i) {
-            ncurses::n_chars(cell_width, row_sep);
+            ncurses::n_chars(style.cell_width, style.row_sep);
             corner();
         }
         ncurses::end_line();
     }
-    void corner() { addch(corner_sep); }
+    void corner() { addch(style.corner_sep); }
     void values(const vector<Cell>& row) {
         const auto line_height = 1;  // TODO: count \n characters
-        const auto previous_pad = (cell_height - line_height) / 2;
+        const auto previous_pad = (style.cell_height - line_height) / 2;
         value_padding(previous_pad, row);
         value(row);
-        const auto next_pad = cell_height - (previous_pad + line_height);
+        const auto next_pad = style.cell_height - (previous_pad + line_height);
         value_padding(next_pad, row);
     }
     void value_padding(int height, const vector<Cell>& row) {
@@ -135,20 +149,16 @@ class MatrixDisplay {
         for (const auto& cell : row) {
             {
                 Color scoped(cell.color_code);
-                ncurses::centered(cell.content, cell_width);
+                ncurses::centered(cell.content, style.cell_width);
             }
             sep_col();
         }
         ncurses::end_line();
     }
-    void sep_col() { addch(col_sep); }
+    void sep_col() { addch(style.col_sep); }
 
    private:
-    const int cell_width = 7;
-    const int cell_height = 3;
-    const char row_sep = '-';
-    const char col_sep = '|';
-    const char corner_sep = '+';
+    const MatrixStyle style;
 };
 }  // namespace ncurses
 
@@ -158,7 +168,8 @@ class Board {
    public:
     void print(const Matrix& data, int score) {
         clear();
-        ncurses::MatrixDisplay display;
+        const auto style = ncurses::MatrixStyle(7, 3, ' ', ' ', ' ');
+        auto display = ncurses::MatrixDisplay(style);
         auto data_view = view(data);
         print_title_bar(score, display.width_in_chars(data_view));
         display.print(data_view);
@@ -202,9 +213,9 @@ class Game {
         return data;
     }
     Status play(Matrix& data) {
-	    if (lost(data)) {
-		    return Status::lost;
-		}
+        if (lost(data)) {
+            return Status::lost;
+        }
         auto status = human_play(data);
         if (status == Status::won) {
         } else if (status == Status::ongoing) {
@@ -353,7 +364,10 @@ class Game {
 }  // namespace game_on
 
 int main() {
-    ncurses::Environment env;
+    const auto env = ncurses::Environment();
+    const auto colorScheme =
+        ncurses::ColorScheme({0, 247, 78, 222, 220, 214, 208, 202, 196, 162,
+                              160, 126, 90, 88, 54, 52});
     game_2048::Game game;
     game_2048::Board board;
     auto data = *game.initialize(4, 4);
@@ -372,7 +386,7 @@ int main() {
             board.print(data, game.score);
             printw("Game over!\nDo you want to quit? (y/n)\n");
             status = game.prompt_for_exit();
-		}
+        }
     }
     return 0;
 }
