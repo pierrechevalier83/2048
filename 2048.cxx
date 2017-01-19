@@ -1,5 +1,9 @@
 #include <curses.h>
+
 #include <boost/optional.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/algorithm/count.hpp>
+#include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 
 #include <cmath>
@@ -49,7 +53,7 @@ struct Cell {
 };
 
 void n_chars(int n, char c) {
-    for (int i = 0; i < n; ++i) {
+    while (n-- > 0) {
         addch(c);
     }
 }
@@ -118,7 +122,7 @@ class MatrixDisplay {
     }
     void sep_row(int n) {
         corner();
-        for (auto i = 0; i < n; ++i) {
+        while (n-- > 0) {
             ncurses::n_chars(style.cell_width, style.row_sep);
             corner();
         }
@@ -140,7 +144,7 @@ class MatrixDisplay {
             padding_cell.content = "";
             return padding_cell;
         });
-        for (int i = 0; i < height; ++i) {
+        while (height-- > 0) {
             value(padding);
         }
     }
@@ -241,17 +245,17 @@ class Game {
 
    private:
     void randomly_insert(int value, Matrix& data) {
-        vector<pair<size_t, size_t>> zeroes;
-        for (size_t ii = 0; ii < data.size(); ++ii) {
-            for (size_t jj = 0; jj < data[ii].size(); ++jj) {
-                if (data[ii][jj] == 0) {
-                    zeroes.push_back(make_pair(ii, jj));
+        using boost::for_each;
+        vector<int*> zeroes;
+        for_each(data, [&](auto& row) {
+            for_each(row, [&](auto& x) {
+                if (x == 0) {
+                    zeroes.push_back(&x);
                 }
-            }
-        }
+            });
+        });
         if (!zeroes.empty()) {
-            auto& pos = zeroes[rand() % zeroes.size()];
-            data[pos.first][pos.second] = value;
+            *zeroes[rand() % zeroes.size()] = value;
         }
     }
     Status human_play(Matrix& data) {
