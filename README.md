@@ -4,14 +4,21 @@ A simple C++/ncurses implementation of the popular game
 
 Build
 -----
-clang++ --std=c++14 -Werror -Wall -Wextra -lncurses 2048.cxx -o 2048
+- `mkdir build`
+- `cd build`
+- `cmake ..`
+- `make`
 
 Run
 ---
-./2048
+- `./2048`
+
+Install
+---
+- `sudo make install`
 
 TODO
 ----
-- CMake
 - Use int consistently
-- Remove raw for loops
+- Screenshots
+- Unicode arrows for guidance
