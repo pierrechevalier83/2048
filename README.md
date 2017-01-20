@@ -22,6 +22,3 @@ Install
 ---
 - `sudo make install`
 
-TODO
-----
-- Use int consistently

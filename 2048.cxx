@@ -1,4 +1,5 @@
 #include "cursed/matrix_display.hpp"
+#include "signed_size/include/signed_size.h"
 
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -171,8 +172,8 @@ class Game {
     Matrix rotate_left(const Matrix& data) {
         assert(!data.empty());
         Matrix rotated(data[0].size(), Row(data.size()));
-        for (size_t i = 0; i < data.size(); ++i) {
-            for (size_t j = 0; j < data[i].size(); ++j) {
+        for (int i = 0; i < signed_size(data); ++i) {
+            for (int j = 0; j < signed_size(data[i]); ++j) {
                 rotated[j][i] = data[i][j];
             }
         }

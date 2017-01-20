@@ -1,3 +1,6 @@
 [submodule "cursed"]
 	path = cursed
 	url = git@github.com:pierrechevalier83/cursed.git
+[submodule "signed_size"]
+	path = signed_size
+	url = git@github.com:pierrechevalier83/signed_size.git
