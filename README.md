@@ -5,7 +5,7 @@ A simple C++/ncurses implementation of the popular game
 
 Download
 --------
-git clone --recursive git@github.com:pierrechevalier83/2048.git
+`git clone --recursive git@github.com:pierrechevalier83/2048.git`
 
 Build
 -----
@@ -16,9 +16,9 @@ Build
 
 Run
 ---
-- `./2048`
+`./2048`
 
 Install
 ---
-- `sudo make install`
+`sudo make install`
 
