@@ -1,6 +1,7 @@
 2048 - game
 -----------
 A simple C++/ncurses implementation of the popular game
+![alt tag](https://raw.githubusercontent.com/pierrechevalier83/2048/master/demo.gif)
 
 Download
 --------
@@ -24,5 +25,4 @@ Install
 TODO
 ----
 - Use int consistently
-- Screenshots
 - Unicode arrows for guidance
