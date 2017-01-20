@@ -1,0 +1,3 @@
+[submodule "cursed"]
+	path = cursed
+	url = git@github.com:pierrechevalier83/cursed.git

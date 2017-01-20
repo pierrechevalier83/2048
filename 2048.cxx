@@ -1,4 +1,4 @@
-#include "cursed_matrix.hpp"
+#include "cursed/matrix_display.hpp"
 
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/filtered.hpp>
