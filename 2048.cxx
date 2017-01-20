@@ -28,6 +28,7 @@ class Board {
         auto data_view = view(data);
         print_title_bar(score, display.width_in_chars(data_view));
         display.print(data_view);
+        print_footer();
     }
 
    private:
@@ -36,11 +37,15 @@ class Board {
         return data[0].size();
     }
     void print_title_bar(int score, int width) {
-        const auto title = "2048 [pierre.tech]"s;
-        printw(title.c_str());
+        const auto title = "2048 [pierrec.tech]"s;
+        addstr(title.c_str());
         const auto remaining_space = width - title.length();
         ncurses::aligned_right(to_string(score), remaining_space);
         addch('\n');
+    }
+    void print_footer() {
+        const auto title = L"    [ ← ↑ → ↓ ], q for quit\n\n"s;
+        addwstr(title.c_str());
     }
     vector<vector<ncurses::Cell>> view(const Matrix& data) {
         vector<vector<ncurses::Cell>> data_view;

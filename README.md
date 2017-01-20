@@ -25,4 +25,3 @@ Install
 TODO
 ----
 - Use int consistently
-- Unicode arrows for guidance
