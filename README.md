@@ -2,6 +2,10 @@
 -----------
 A simple C++/ncurses implementation of the popular game
 
+Download
+--------
+git clone --recursive git@github.com:pierrechevalier83/2048.git
+
 Build
 -----
 - `mkdir build`
