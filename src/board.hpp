@@ -55,7 +55,7 @@ class Board {
         auto width = *display_width;
         ncurses::printline(L"Game over!"s, width, ncurses::Aligned::center);
         ncurses::end_line();
-        ncurses::printline(L"Do you want quit? (y/n)"s, width,
+        ncurses::printline(L"Do you want to quit? (y/n)"s, width,
                            ncurses::Aligned::center);
         ncurses::end_line();
     }
