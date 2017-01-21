@@ -18,7 +18,15 @@ class Board {
    public:
     void print(const Matrix& data, int score) {
         clear();
-        const auto style = ncurses::MatrixStyle(7, 3, ' ', ' ', ' ');
+        /* TODO: box this way
+          ┏━┳━┓
+          ┃ ┃ ┃
+          ┣━╋━┫
+          ┃ ┃ ┃
+          ┗━┻━┛
+        */
+        const auto style = ncurses::MatrixStyle(7, 3, L" ", L" ", L" ");
+
         auto display = ncurses::MatrixDisplay(style);
         auto data_view = view(data);
         print_title_bar(score, display.width_in_chars(data_view));
@@ -35,7 +43,7 @@ class Board {
         const auto title = "2048 [pierrec.tech]"s;
         addstr(title.c_str());
         const auto remaining_space = width - title.length();
-        ncurses::aligned_right(to_string(score), remaining_space);
+        ncurses::aligned_right(to_wstring(score), remaining_space);
         addch('\n');
     }
     void print_footer() {
@@ -47,7 +55,7 @@ class Board {
         boost::transform(data, back_inserter(data_view), [](const auto& row) {
             vector<ncurses::Cell> row_view;
             boost::transform(row, back_inserter(row_view), [](const int value) {
-                return ncurses::Cell(value == 0 ? "." : to_string(value),
+                return ncurses::Cell(value == 0 ? L"." : to_wstring(value),
                                      static_cast<int>(log2(value)));
             });
             return row_view;
@@ -56,4 +64,4 @@ class Board {
     }
 };
 
-} // namepsace game_2048
+}  // namespace game_2048
