@@ -177,4 +177,3 @@ class Game {
 };
 
 }  // namespace game_2048
-
