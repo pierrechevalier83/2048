@@ -1,5 +1,6 @@
-#include "cursed/matrix_display.hpp"
-#include "signed_size/include/signed_size.h"
+#pragma once
+
+#include "../signed_size/include/signed_size.h"
 
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -19,48 +20,6 @@ using Row = vector<int>;
 using Matrix = vector<Row>;
 
 namespace game_2048 {
-
-class Board {
-   public:
-    void print(const Matrix& data, int score) {
-        clear();
-        const auto style = ncurses::MatrixStyle(7, 3, ' ', ' ', ' ');
-        auto display = ncurses::MatrixDisplay(style);
-        auto data_view = view(data);
-        print_title_bar(score, display.width_in_chars(data_view));
-        display.print(data_view);
-        print_footer();
-    }
-
-   private:
-    int n_cols(const Matrix& data) {
-        assert(!data.empty());
-        return data[0].size();
-    }
-    void print_title_bar(int score, int width) {
-        const auto title = "2048 [pierrec.tech]"s;
-        addstr(title.c_str());
-        const auto remaining_space = width - title.length();
-        ncurses::aligned_right(to_string(score), remaining_space);
-        addch('\n');
-    }
-    void print_footer() {
-        const auto title = L"    [ ← ↑ → ↓ ], q for quit\n\n"s;
-        addwstr(title.c_str());
-    }
-    vector<vector<ncurses::Cell>> view(const Matrix& data) {
-        vector<vector<ncurses::Cell>> data_view;
-        boost::transform(data, back_inserter(data_view), [](const auto& row) {
-            vector<ncurses::Cell> row_view;
-            boost::transform(row, back_inserter(row_view), [](const int value) {
-                return ncurses::Cell(value == 0 ? "." : to_string(value),
-                                     static_cast<int>(log2(value)));
-            });
-            return row_view;
-        });
-        return data_view;
-    }
-};
 
 enum class Status { ongoing, invalid_move, interrupted, lost, won };
 
@@ -224,32 +183,5 @@ class Game {
     }
 };
 
-}  // namespace game_on
+}  // namespace game_2048
 
-int main() {
-    const auto env = ncurses::Environment();
-    const auto colorScheme =
-        ncurses::ColorScheme({0, 247, 78, 222, 220, 214, 208, 202, 196, 162,
-                              160, 126, 90, 88, 54, 52});
-    game_2048::Game game;
-    game_2048::Board board;
-    auto data = *game.initialize(4, 4);
-    auto status = game_2048::Status::ongoing;
-    while (status == game_2048::Status::ongoing) {
-        board.print(data, game.score);
-        status = game.play(data);
-
-        if (status == game_2048::Status::won) {
-            board.print(data, game.score);
-            printw(
-                "Congratulations! You won!\nDo you want to stop playing now? "
-                "(y/n)\n");
-            status = game.prompt_for_exit();
-        } else if (status == game_2048::Status::lost) {
-            board.print(data, game.score);
-            printw("Game over!\nDo you want to quit? (y/n)\n");
-            status = game.prompt_for_exit();
-        }
-    }
-    return 0;
-}

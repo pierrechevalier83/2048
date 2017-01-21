@@ -22,7 +22,7 @@ endif()
 find_package( Curses REQUIRED )
 include_directories( ${CURSES_INCLUDE_DIRS} )
 
-add_executable(2048 2048.cxx)
+add_executable(2048 src/main.cxx)
 target_link_libraries( 2048 ${CURSES_LIBRARIES} )
 
 install(TARGETS 2048 DESTINATION bin)
