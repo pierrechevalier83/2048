@@ -35,9 +35,6 @@ class Game {
             computer_play(data);
         } else if (status == Status::invalid_move) {
             status = Status::ongoing;
-        } else if (status == Status::interrupted) {
-            printw("Do you really want to quit? (y/n)\n");
-            status = prompt_for_exit();
         }
         return status;
     }

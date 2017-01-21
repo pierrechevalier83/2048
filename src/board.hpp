@@ -35,22 +35,36 @@ class Board {
         }
         print_title_bar(score, *display_width);
         display.print(data_view);
+    }
+    void print_ongoing(const Matrix& data, int score) {
+        print(data, score);
         print_footer(*display_width);
     }
-    void print_victory(const Matrix& data, int score) {
+    void print_won(const Matrix& data, int score) {
         print(data, score);
         auto width = *display_width;
-        ncurses::printline(L"Congratulations! You won."s, width, ncurses::Aligned::center);
+        ncurses::printline(L"Congratulations! You won."s, width,
+                           ncurses::Aligned::center);
         ncurses::end_line();
-        ncurses::printline(L"Do you want to stop playing? (y/n)"s, width, ncurses::Aligned::center);
+        ncurses::printline(L"Do you want to stop playing? (y/n)"s, width,
+                           ncurses::Aligned::center);
         ncurses::end_line();
     }
-    void print_defeat(const Matrix& data, int score) {
+    void print_lost(const Matrix& data, int score) {
         print(data, score);
         auto width = *display_width;
         ncurses::printline(L"Game over!"s, width, ncurses::Aligned::center);
         ncurses::end_line();
-        ncurses::printline(L"Do you want quit? (y/n)"s, width, ncurses::Aligned::center);
+        ncurses::printline(L"Do you want quit? (y/n)"s, width,
+                           ncurses::Aligned::center);
+        ncurses::end_line();
+    }
+    void print_interrupted(const Matrix& data, int score) {
+        print(data, score);
+        auto width = *display_width;
+        ncurses::printline(L"Do you really want to quit? (y/n)"s, width,
+                           ncurses::Aligned::center);
+        ncurses::end_line();
         ncurses::end_line();
     }
 
@@ -63,7 +77,8 @@ class Board {
         const auto title = L"2048 [pierrec.tech]"s;
         ncurses::printline(title);
         const auto remaining_space = width - title.length();
-        ncurses::printline(to_wstring(score), remaining_space, ncurses::Aligned::right);
+        ncurses::printline(to_wstring(score), remaining_space,
+                           ncurses::Aligned::right);
         ncurses::end_line();
     }
     void print_footer(int width) {
