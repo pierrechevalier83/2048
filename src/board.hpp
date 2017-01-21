@@ -2,16 +2,9 @@
 
 #include "../cursed/include/matrix_display.hpp"
 
-#include <boost/optional.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/algorithm/count.hpp>
-#include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 
 #include <cmath>
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
 #include <memory>
 #include <vector>
 

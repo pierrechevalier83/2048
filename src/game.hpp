@@ -2,18 +2,11 @@
 
 #include "../signed_size/include/signed_size.h"
 
-#include <boost/optional.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/algorithm/count.hpp>
-#include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm/transform.hpp>
-
-#include <cmath>
 #include <cstdlib>
-#include <iomanip>
-#include <iostream>
 #include <memory>
 #include <vector>
+
+#include <boost/range/algorithm/transform.hpp>
 
 using namespace std;
 using Row = vector<int>;
