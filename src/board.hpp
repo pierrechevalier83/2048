@@ -18,12 +18,11 @@ namespace game_2048 {
 class Board {
    public:
     Board() {
-    const auto env = ncurses::Environment();
-    const auto colorScheme =
-        ncurses::ColorScheme({0, 247, 78, 222, 220, 214, 208, 202, 196, 162,
-                              160, 126, 90, 88, 54, 52});
-	
-	}
+        const auto env = ncurses::Environment();
+        const auto colorScheme =
+            ncurses::ColorScheme({0, 247, 78, 222, 220, 214, 208, 202, 196, 162,
+                                  160, 126, 90, 88, 54, 52});
+    }
     void print(const Matrix& data, int score) {
         clear();
         /* TODO: box this way
@@ -68,8 +67,8 @@ class Board {
         return data[0].size();
     }
     void print_title_bar(int score, int width) {
-        const auto title = "2048 [pierrec.tech]"s;
-        addstr(title.c_str());
+        const auto title = L"2048 [pierrec.tech]"s;
+        ncurses::aligned_left(title, title.length());
         const auto remaining_space = width - title.length();
         ncurses::aligned_right(to_wstring(score), remaining_space);
         ncurses::end_line();
