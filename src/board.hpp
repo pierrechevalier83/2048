@@ -25,14 +25,7 @@ class Board {
     }
     void print(const Matrix& data, int score) {
         clear();
-        /* TODO: box this way
-          ┏━┳━┓
-          ┃ ┃ ┃
-          ┣━╋━┫
-          ┃ ┃ ┃
-          ┗━┻━┛
-        */
-        const auto style = ncurses::MatrixStyle(7, 3, L" ", L" ", L" ");
+        const auto style = ncurses::MatrixStyle(7, 3);
 
         auto display = ncurses::MatrixDisplay(style);
         auto data_view = view(data);
@@ -47,17 +40,17 @@ class Board {
     void print_victory(const Matrix& data, int score) {
         print(data, score);
         auto width = *display_width;
-        ncurses::centered(L"Congratulations! You won."s, width);
+        ncurses::printline(L"Congratulations! You won."s, width, ncurses::Aligned::center);
         ncurses::end_line();
-        ncurses::centered(L"Do you want to stop playing? (y/n)"s, width);
+        ncurses::printline(L"Do you want to stop playing? (y/n)"s, width, ncurses::Aligned::center);
         ncurses::end_line();
     }
     void print_defeat(const Matrix& data, int score) {
         print(data, score);
         auto width = *display_width;
-        ncurses::centered(L"Game over!"s, width);
+        ncurses::printline(L"Game over!"s, width, ncurses::Aligned::center);
         ncurses::end_line();
-        ncurses::centered(L"Do you want quit? (y/n)"s, width);
+        ncurses::printline(L"Do you want quit? (y/n)"s, width, ncurses::Aligned::center);
         ncurses::end_line();
     }
 
@@ -68,14 +61,14 @@ class Board {
     }
     void print_title_bar(int score, int width) {
         const auto title = L"2048 [pierrec.tech]"s;
-        ncurses::aligned_left(title, title.length());
+        ncurses::printline(title);
         const auto remaining_space = width - title.length();
-        ncurses::aligned_right(to_wstring(score), remaining_space);
+        ncurses::printline(to_wstring(score), remaining_space, ncurses::Aligned::right);
         ncurses::end_line();
     }
     void print_footer(int width) {
         const auto title = L"[ ← ↑ → ↓ ], q for quit"s;
-        ncurses::centered(title, width);
+        ncurses::printline(title, width, ncurses::Aligned::center);
         ncurses::end_line();
         ncurses::end_line();
     }
